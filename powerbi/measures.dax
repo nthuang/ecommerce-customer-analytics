@@ -1,0 +1,47 @@
+Delivered Orders =
+DISTINCTCOUNT('order_fact'[order_id])
+
+Item Revenue =
+SUM('order_fact'[item_revenue])
+
+Average Order Value =
+DIVIDE([Item Revenue], [Delivered Orders])
+
+Customer Count =
+DISTINCTCOUNT('CustomerSegments'[customer_unique_id])
+
+Repeat Customers =
+CALCULATE(
+    [Customer Count],
+    'CustomerSegments'[is_repeat_customer] = TRUE()
+)
+
+Repeat Customer Rate =
+DIVIDE([Repeat Customers], [Customer Count])
+
+Average Delivery Days =
+AVERAGE('order_fact'[delivery_days])
+
+Average Review Score =
+AVERAGE('order_fact'[review_score])
+
+Segment Customer Revenue =
+SUM('CustomerSegments'[total_item_revenue])
+
+Average Recency Days =
+AVERAGE('CustomerSegments'[recency_days])
+
+Segment Revenue Share =
+DIVIDE(
+    [Segment Customer Revenue],
+    CALCULATE(
+        [Segment Customer Revenue],
+        REMOVEFILTERS('CustomerSegments'[segment])
+    )
+)
+
+Seller-Order Count =
+SUM('seller_performance'[seller_order_count])
+
+Seller Item Revenue =
+SUM('seller_performance'[item_revenue])

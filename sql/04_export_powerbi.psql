@@ -1,0 +1,2 @@
+\copy (SELECT * FROM analytics.order_fact ORDER BY order_purchase_timestamp, order_id) TO 'data/processed/powerbi_order_fact.csv' WITH (FORMAT csv, HEADER true)
+\copy (SELECT * FROM analytics.seller_performance ORDER BY seller_id) TO 'data/processed/powerbi_seller_performance.csv' WITH (FORMAT csv, HEADER true)

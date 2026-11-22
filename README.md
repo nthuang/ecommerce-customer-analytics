@@ -19,18 +19,27 @@ The source data contains approximately 100,000 orders from Olist, one of the lar
 
 ## Current Status
 
-The project is in the data discovery and schema-validation stage.
+Data discovery, exploratory analysis, customer feature engineering, and an initial rule-based customer segmentation are complete in pandas.
 
-The initial notebook:
+The notebooks are organized by task:
 
-- Loads and joins all available raw datasets
-- Reviews table shapes and columns
-- Identifies missing values
-- Validates primary and foreign key relationships
-- Checks row granularity across customers, orders, items, payments, and reviews
-- Profiles the customer-to-order relationship
+- `data_exploration.ipynb` profiles source tables and validates their keys and relationships.
+- `eda.ipynb` explores revenue, category, repeat-purchase, delivery, geographic, and payment patterns.
+- `customer_features.ipynb` builds validated order- and customer-level tables, assigns interpretable customer segments, and exports processed CSVs.
+- `sql/` contains PostgreSQL raw-data loading and analytics-view definitions, including seller-level delivery and review measures. The order and customer views have been reconciled against the pandas outputs.
 
-Planned work includes data cleaning, SQL transformations, customer-level feature engineering, RFM segmentation, churn or repeat-purchase modeling, interactive dashboards, and an executive findings summary.
+**Next milestone:** assemble and validate the Power BI report using the setup and measures in `powerbi/`. Churn modeling is deferred until a time-based target and observation window are defined.
+
+## Executive Summary
+
+The analysis uses delivered orders purchased between September 2016 and August 2018. Revenue is the sum of item prices and excludes freight.
+
+- **Revenue and categories:** Delivered-order revenue peaked in November 2017 at R$987,765 across 7,289 orders. Health and beauty, watches and gifts, and bed, bath, and table were the top three categories by item revenue.
+- **Repeat purchasing:** 2,801 of 93,358 customers with delivered orders purchased more than once in the observed period (3.00%). This is a historical repeat rate, not a lifetime churn measure.
+- **Delivery and reviews:** Average delivery time was 12.52 days. One-star orders averaged 21.32 delivery days versus 10.68 days for five-star orders; the correlation was -0.334. This is an association, not proof of causation.
+- **Customer segments:** Two higher-spend one-time-buyer segments represented about 48.5% of customers and 78.65% of item revenue. These median-based segments describe the historical dataset and are not a current customer contact list.
+
+Potential actions are to test second-purchase campaigns with a holdout group, investigate delivery delays in the lowest-rated segments, and validate category margins before changing inventory or promotions. Campaign effectiveness and profitability are not measured in the current dataset.
 
 ## Dataset
 
@@ -42,7 +51,7 @@ The project uses the public Olist Brazilian E-Commerce Dataset. The raw data is 
 | `orders` | Purchase, approval, delivery, and status timestamps | Order |
 | `order_items` | Products and sellers associated with each order | Order item |
 | `payments` | Payment type, installments, and transaction value | Order payment |
-| `reviews` | Customer review scores and written feedback | Order review |
+| `reviews` | Customer review scores and written feedback | Review record |
 | `products` | Product characteristics and category | Product |
 | `sellers` | Seller location | Seller |
 | `category_translation` | Portuguese-to-English product category names | Product category |
@@ -58,33 +67,29 @@ Raw CSV files are stored in `data/raw/`.
    - Validate joins and detect duplicate or orphaned records
 
 2. **SQL data modeling**
-   - Build a staging layer for cleaned source tables
-   - Create an order-level fact table
-   - Create a customer-level analytics table
+   - PostgreSQL raw-table DDL and CSV load script executed
+   - Order-fact and customer-feature views executed
+   - Row counts, revenue, and customer features reconciled with pandas
 
 3. **Customer feature engineering**
-   - Recency, frequency, and monetary value
-   - Average order value
-   - Repeat-purchase indicator
-   - Delivery-time metrics
-   - Review-score metrics
-   - Product-category preferences
+   - RFM-style recency, frequency, monetary value, average order value, and repeat-purchase features built in pandas
+   - SQL feature view reconciled with the pandas output
+   - Delivery-time and latest-review measures added at order grain
+   - Add customer-level product-category preferences
 
 4. **Customer segmentation**
-   - RFM segmentation
-   - Clustering using K-means or another interpretable method
-   - Segment profiles and recommended marketing actions
+   - Five rule-based, median-threshold segments created and profiled in pandas
+   - Validate segments with cohort and category-level analysis
+   - Consider clustering only if it adds interpretable value beyond the baseline segments
 
 5. **Business analysis**
-   - Revenue and order trends
-   - Customer and category concentration
-   - Retention and repeat purchasing
-   - Geographic performance
-   - Delivery and review score relationships
+   - Revenue, category, repeat-purchase, geographic, payment, and delivery/review EDA completed
+   - Seller-level delivery and review metrics built in SQL
 
 6. **Reporting**
-   - Interactive dashboard
-   - Executive summary
+   - Executive summary drafted in this README
+   - Power BI data model, measures, and report layout prepared
+   - Assemble and validate the `.pbix` report in Power BI Desktop
    - Visualization exports
    - SQL and Python reproducibility
 
@@ -95,7 +100,19 @@ ecommerce-customer-analytics/
 |-- data/
 |   `-- raw/                 # Source CSV datasets
 |-- notebooks/
-|   `-- data_exploration.ipynb
+|   |-- data_exploration.ipynb
+|   |-- eda.ipynb
+|   `-- customer_features.ipynb
+|-- sql/
+|   |-- 00_load_raw.psql
+|   |-- 01_order_fact.sql
+|   |-- 02_customer_features.sql
+|   |-- 03_seller_performance.sql
+|   |-- 04_export_powerbi.psql
+|   `-- README.md
+|-- powerbi/
+|   |-- README.md
+|   `-- measures.dax
 |-- requirements.txt
 `-- README.md
 ```
@@ -135,7 +152,7 @@ Then activate the environment again.
 ### Launch the Notebook
 
 ```bash
-jupyter notebook notebooks/data_exploration.ipynb
+jupyter notebook notebooks/eda.ipynb
 ```
 
 ## Tools and Technologies
