@@ -1,104 +1,97 @@
-# E-Commerce Customer Analytics
+# Brazilian E-Commerce Customer Analytics
 
-## Overview
+**An end-to-end analytics project using Python, PostgreSQL, and Power BI**
 
-This project analyzes Brazilian e-commerce marketplace data to understand customer behavior, purchasing patterns, retention, order delivery, and customer satisfaction.
+## Project overview
 
-The source data contains approximately 100,000 orders from Olist, one of the largest Brazilian e-commerce marketplaces. The project will combine transactional, customer, product, seller, payment, review, and geographic data to build an end-to-end customer analytics workflow.
+This project analyzes the public Olist Brazilian E-Commerce Dataset to understand customer purchasing behavior, repeat purchases, delivery performance, and seller quality. It turns raw marketplace data into reusable analytical tables, a three-page Power BI report, and recommendations that a business could test.
 
-**Primary goal:** transform raw marketplace data into a reproducible analytics pipeline and deliver actionable insights for customer retention, revenue growth, and operational improvement.
+The analysis covers orders purchased from September 2016 through August 2018. It is a historical case study, not a live customer or seller monitoring system.
 
-## Business Questions
+### Business questions
 
-- What factors are associated with repeat purchases and customer retention?
-- Which customer segments generate the most revenue and place the most orders?
-- How do order value and payment behavior vary by customer segment?
-- Which product categories contribute most to revenue and order volume?
-- How does delivery performance relate to review scores and customer satisfaction?
-- Which regions contain high-value or frequently purchasing customers?
+- Which customer groups contribute most to item revenue, and how common are repeat purchases?
+- How do revenue and delivery performance differ by month and state?
+- How are seller delivery performance and customer reviews related?
+- What retention, logistics, and seller-quality actions are worth testing?
 
-## Current Status
+## What I built
 
-Data discovery, exploratory analysis, customer feature engineering, and an initial rule-based customer segmentation are complete in pandas.
+1. **Explored and validated source data** in Jupyter notebooks, including table grain, missing values, keys, and relationships.
+2. **Engineered order and customer features** in pandas, including recency, frequency, monetary value, average order value, repeat-purchase status, and five interpretable customer segments.
+3. **Created PostgreSQL analytics views** for delivered-order performance, customer features, and seller performance. Documented reconciliation against the pandas outputs.
+4. **Built a Power BI report** with Customer Segmentation, Order Performance, and Seller Performance pages.
+5. **Translated findings into business recommendations** for retention experiments, delivery improvement, and seller monitoring.
 
-The notebooks are organized by task:
+## Technologies
 
-- `data_exploration.ipynb` profiles source tables and validates their keys and relationships.
-- `eda.ipynb` explores revenue, category, repeat-purchase, delivery, geographic, and payment patterns.
-- `customer_features.ipynb` builds validated order- and customer-level tables, assigns interpretable customer segments, and exports processed CSVs.
-- `sql/` contains PostgreSQL raw-data loading and analytics-view definitions, including seller-level delivery and review measures. The order and customer views have been reconciled against the pandas outputs.
+- Python: pandas, NumPy, Matplotlib, Jupyter
+- SQL: PostgreSQL, views, aggregation, data validation
+- BI: Power BI Desktop, DAX measures, interactive report pages
 
-**Next milestone:** assemble and validate the Power BI report using the setup and measures in `powerbi/`. Churn modeling is deferred until a time-based target and observation window are defined.
+## Key findings
 
-## Executive Summary
+- **Repeat purchasing was uncommon in the observed period:** 2,801 of 93,358 customers with delivered orders purchased more than once (3.00%). Repeat buyers contributed 5.51% of item revenue. This is a historical repeat rate, not a lifetime churn measure.
+- **Higher-spend one-time buyers generated most revenue:** two such segments represented about 48.5% of customers and 78.65% of item revenue (approximately R$10.40 million).
+- **Revenue was geographically concentrated:** São Paulo, Rio de Janeiro, and Minas Gerais together contributed about 63.38% of delivered-order item revenue.
+- **Delivery times differed across regions:** the Power BI order fact averages 12.56 days across 96,470 delivered orders with valid delivery timestamps. Bahia averaged 19.34 days across 3,256 orders, making it a higher-volume improvement opportunity than the most delayed, low-volume states.
+- **Seller comparisons need careful interpretation:** the top 10 sellers generated about 13.27% of seller item revenue. Among sellers with at least 20 reviews, late-delivery rates and average review scores had a correlation of about -0.53; this is an association, not evidence of causation.
 
-The analysis uses delivered orders purchased between September 2016 and August 2018. Revenue is the sum of item prices and excludes freight.
+Revenue is reported in Brazilian reais (R$) and means item price only; it excludes freight, costs, and profit.
 
-- **Revenue and categories:** Delivered-order revenue peaked in November 2017 at R$987,765 across 7,289 orders. Health and beauty, watches and gifts, and bed, bath, and table were the top three categories by item revenue.
-- **Repeat purchasing:** 2,801 of 93,358 customers with delivered orders purchased more than once in the observed period (3.00%). This is a historical repeat rate, not a lifetime churn measure.
-- **Delivery and reviews:** Average delivery time was 12.52 days. One-star orders averaged 21.32 delivery days versus 10.68 days for five-star orders; the correlation was -0.334. This is an association, not proof of causation.
-- **Customer segments:** Two higher-spend one-time-buyer segments represented about 48.5% of customers and 78.65% of item revenue. These median-based segments describe the historical dataset and are not a current customer contact list.
+## Power BI dashboards
 
-Potential actions are to test second-purchase campaigns with a holdout group, investigate delivery delays in the lowest-rated segments, and validate category margins before changing inventory or promotions. Campaign effectiveness and profitability are not measured in the current dataset.
+The screenshots let you review the report without opening the PBIX. The report now formats revenue in Brazilian reais (**R$**).
 
-## Dataset
+### Customer Segmentation
 
-The project uses the public Olist Brazilian E-Commerce Dataset. The raw data is organized into the following tables:
+Customer counts and item revenue by historical segment, with a customer-level segment summary.
 
-| Table | Description | Granularity |
-|---|---|---|
-| `customers` | Customer location and unique customer identifiers | Customer |
-| `orders` | Purchase, approval, delivery, and status timestamps | Order |
-| `order_items` | Products and sellers associated with each order | Order item |
-| `payments` | Payment type, installments, and transaction value | Order payment |
-| `reviews` | Customer review scores and written feedback | Review record |
-| `products` | Product characteristics and category | Product |
-| `sellers` | Seller location | Seller |
-| `category_translation` | Portuguese-to-English product category names | Product category |
-| `geolocation` | Geographic coordinates and Brazilian ZIP prefixes | Location |
+![Customer Segmentation dashboard](powerbi/customer_segmentation.png)
 
-Raw CSV files are stored in `data/raw/`.
+### Order Performance
 
-## Project Roadmap
+Revenue by state and month, delivery days by state, and an order-performance table.
 
-1. **Data quality assessment**
-   - Document missing and inconsistent values
-   - Identify status-dependent delivery fields
-   - Validate joins and detect duplicate or orphaned records
+![Order Performance dashboard](powerbi/order_performance.png)
 
-2. **SQL data modeling**
-   - PostgreSQL raw-table DDL and CSV load script executed
-   - Order-fact and customer-feature views executed
-   - Row counts, revenue, and customer features reconciled with pandas
+### Seller Performance
 
-3. **Customer feature engineering**
-   - RFM-style recency, frequency, monetary value, average order value, and repeat-purchase features built in pandas
-   - SQL feature view reconciled with the pandas output
-   - Delivery-time and latest-review measures added at order grain
-   - Add customer-level product-category preferences
+Seller revenue and operating metrics, plus the relationship between seller late-delivery rate and review score.
 
-4. **Customer segmentation**
-   - Five rule-based, median-threshold segments created and profiled in pandas
-   - Validate segments with cohort and category-level analysis
-   - Consider clustering only if it adds interpretable value beyond the baseline segments
+![Seller Performance dashboard](powerbi/seller_performance.png)
 
-5. **Business analysis**
-   - Revenue, category, repeat-purchase, geographic, payment, and delivery/review EDA completed
-   - Seller-level delivery and review metrics built in SQL
+The [Power BI README](powerbi/README.md) explains how to open the report, refresh its CSV sources, and interpret the dashboard measures. The detailed [business insights and recommendations](powerbi/business_insights_and_recommendations.md) document provides findings and caveats.
 
-6. **Reporting**
-   - Executive summary drafted in this README
-   - Power BI data model, measures, and report layout prepared
-   - Assemble and validate the `.pbix` report in Power BI Desktop
-   - Visualization exports
-   - SQL and Python reproducibility
+## Recommendations
 
-## Repository Structure
+- **Test second-purchase campaigns:** target first-time buyers with relevant follow-up messaging and compare results with a holdout group. Measure incremental repeat purchases and contribution margin, not just clicks or gross revenue.
+- **Prioritize logistics investigations by impact:** examine high-volume regions with slower delivery, and separately diagnose extreme delays in low-volume regions before committing resources. Track late-delivery rates and delivery-time percentiles.
+- **Monitor seller quality with denominators:** use order and review counts alongside late rates and scores. Investigate patterns with sellers before treating descriptive correlations as causes or using them for penalties.
+
+## Data pipeline
+
+```text
+Olist source CSVs
+      |
+      +--> Python notebooks: data quality, EDA, customer features and segments
+      |
+      +--> PostgreSQL: raw staging tables --> order, customer and seller views
+                                      |
+                                      +--> CSV exports + customer segment data
+                                                   |
+                                                   +--> Power BI report
+```
+
+The Python analysis reads nine source CSVs. The PostgreSQL loader stages the five tables used by its current views: customers, orders, order items, payments, and reviews.
+
+## Repository structure
 
 ```text
 ecommerce-customer-analytics/
-|-- data/
-|   `-- raw/                 # Source CSV datasets
+|-- data/                              # Local data; excluded from Git
+|   |-- raw/                           # Downloaded source CSVs
+|   `-- processed/                     # Notebook and SQL outputs
 |-- notebooks/
 |   |-- data_exploration.ipynb
 |   |-- eda.ipynb
@@ -111,86 +104,70 @@ ecommerce-customer-analytics/
 |   |-- 04_export_powerbi.psql
 |   `-- README.md
 |-- powerbi/
-|   |-- README.md
-|   `-- measures.dax
+|   |-- Ecommerce_Customer_Analytics.pbix
+|   |-- customer_segmentation.png
+|   |-- order_performance.png
+|   |-- seller_performance.png
+|   |-- business_insights_and_recommendations.md
+|   `-- README.md
 |-- requirements.txt
 `-- README.md
 ```
 
-Additional folders and scripts will be added as the transformation and reporting stages are completed.
+## Reproduce the analysis
 
-## Environment Setup
+### 1. Get the data
 
-### Prerequisites
+Download the [Olist Brazilian E-Commerce Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) and extract its CSV files into `data/raw/`. Keep the original filenames. The raw and processed data folders are excluded from Git, so a fresh clone needs the dataset before the notebooks or SQL loader can run.
 
-- Python 3.10 or later
-- A virtual environment tool
+### 2. Set up Python and run the notebooks
 
-### Installation
-
-From the project root:
+Python 3.10 or later is recommended. From the repository root:
 
 ```bash
-# Create a virtual environment
 python -m venv .venv
-
-# Activate on Windows PowerShell
-.venv\Scripts\Activate.ps1
-
-# Install dependencies
+source .venv/bin/activate
 python -m pip install -r requirements.txt
+cd notebooks
+jupyter notebook
 ```
 
-If PowerShell blocks virtual environment activation, run:
+On Windows PowerShell, activate the environment with:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
 ```
 
-Then activate the environment again.
+Run the notebooks from top to bottom. Start Jupyter from `notebooks/` so the relative raw-data paths in the exploration and EDA notebooks resolve correctly. The customer feature notebook writes customer-segment data under `data/processed/`.
 
-### Launch the Notebook
+### 3. Build the PostgreSQL views (optional)
+
+Create an empty project database and set `DATABASE_URL` in your local shell. Do not commit credentials. From the repository root, run:
 
 ```bash
-jupyter notebook notebooks/eda.ipynb
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/00_load_raw.psql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/01_order_fact.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/02_customer_features.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/03_seller_performance.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/04_export_powerbi.psql
 ```
 
-## Tools and Technologies
+The raw loader is intended to run once against empty project tables. It creates the Power BI order and seller CSV exports in `data/processed/`; the customer-segment CSV is generated by the customer feature notebook. See [sql/README.md](sql/README.md) for validation details and metric definitions.
 
-- Python
-- Pandas
-- NumPy
-- Jupyter Notebook
-- Matplotlib
-- SQLAlchemy
-- PostgreSQL-compatible SQL
-- PostgreSQL
+### 4. Open or refresh Power BI
 
-## Example Analytics Outputs
+Open `powerbi/Ecommerce_Customer_Analytics.pbix` in Power BI Desktop. To refresh or rebuild its data, first generate the CSVs described in [powerbi/README.md](powerbi/README.md), then refresh the three CSV queries in Power BI.
 
-As the project develops, key deliverables will include:
+## Important interpretation notes
 
-- Customer segment profiles
-- RFM distribution and segment summaries
-- Repeat-purchase rates
-- Revenue and order trends
-- Top product categories
-- Regional sales performance
-- Delivery-time and review-score analysis
-- Prioritized business recommendations
+- The dataset ends in August 2018. The segments and recency values describe that historical snapshot and should not be used to target current customers.
+- Repeat purchase means more than one delivered order in the observed period; customers had different amounts of time to return.
+- The 12.52-day EDA delivery average uses 95,824 delivered orders that also have a review. The 12.56-day Power BI order-fact average uses 96,470 delivered orders with valid delivery timestamps.
+- The customer page's order-level average order value (R$137.04) differs from the segment table's customer-level average (R$137.51); these are different grains.
+- Seller-page totals average seller-level metrics equally. For example, the displayed 6.91% late rate and 4.18 average review score differ from order/review-weighted marketplace figures of about 6.69% and 4.14.
+- An order-level review can be associated with multiple sellers on a multi-seller order. Seller-level review comparisons are descriptive, not independent causal ratings.
+- Item revenue is not profit; the dataset does not measure margins, campaign costs, or the causal effect of recommendations.
 
-## Key Skills Demonstrated
+## Data source
 
-- Data cleaning and validation
-- Relational data analysis
-- SQL-based transformation and modeling
-- Exploratory data analysis
-- Customer segmentation
-- Feature engineering
-- Data visualization
-- Statistical and business interpretation
-- Reproducible analytics documentation
-
-## Data Source
-
-The source project is the Olist Brazilian E-Commerce Dataset. This project is an independent analysis of the public dataset and is not affiliated with Olist.
+This project uses the public [Olist Brazilian E-Commerce Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce). It is an independent analysis and is not affiliated with Olist.

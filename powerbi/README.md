@@ -1,45 +1,100 @@
-# Power BI dashboard
+# Power BI report
 
-This folder contains the model setup and report plan for a Power BI report. The `.pbix` file must be created and saved from Power BI Desktop; it is not generated in this Linux workspace.
+This folder contains the three-page Power BI report, screenshots, and a narrative summary of the findings. Open [`Ecommerce_Customer_Analytics.pbix`](Ecommerce_Customer_Analytics.pbix) in Power BI Desktop to inspect the interactive report. The screenshots in this folder are also embedded in the [main project README](../README.md).
 
-## Load the data
-
-1. From the repository root, export the PostgreSQL views:
-   ```bash
-   psql -d ecommerce_analytics -v ON_ERROR_STOP=1 -f sql/04_export_powerbi.psql
-   ```
-   This creates `data/processed/powerbi_order_fact.csv` and `data/processed/powerbi_seller_performance.csv`.
-2. Confirm `data/processed/customer_segments.csv` exists. If it does not, run the customer-feature notebook first.
-3. In Power BI Desktop, use **Get data → Text/CSV** to load all three CSVs:
-   - `powerbi_order_fact.csv`; rename the table to `order_fact`.
-   - `powerbi_seller_performance.csv`; rename the table to `seller_performance`.
-   - `customer_segments.csv`; rename the table to `CustomerSegments`.
-4. In Model view, create a one-to-many, single-direction relationship from `CustomerSegments[customer_unique_id]` to `order_fact[customer_unique_id]`. Keep `seller_performance` disconnected: it is already aggregated by seller, while `order_fact` has one row per order and no seller key.
-5. Confirm `CustomerSegments[is_repeat_customer]` is a True/False column and the order timestamps are typed as Date/Time.
-6. Add the measures in [`measures.dax`](./measures.dax).
-
-The exports are local and ignored by Git; no database credentials are needed in Power BI. After rebuilding the SQL views or customer segments, rerun the export and refresh the CSV queries in Power BI.
+The report uses three CSV tables: an order fact, customer segments, and seller performance. Detailed business interpretation is in [business_insights_and_recommendations.md](business_insights_and_recommendations.md).
 
 ## Report pages
 
-### Executive overview
+### Order Performance
 
-- KPI cards: item revenue, delivered orders, average order value, customer count, repeat-customer rate, average delivery days, and average review score.
-- Monthly line chart: item revenue by `order_fact[order_purchase_timestamp]` date hierarchy.
-- Add a purchase-date slicer. Keep the report's revenue definition as item price, excluding freight.
-- Customer counts, repeat rate, and segment metrics are based on the full historical customer snapshot; a purchase-date slicer does not recalculate them.
+Shows delivered orders, item revenue, delivery time, review score, revenue by state, average delivery days by state, monthly revenue, and a state-level performance table. Revenue is item price and excludes freight.
 
-### Customer segments
+### Customer Segmentation
 
-- Bar chart: customer count by segment.
-- Bar or treemap: customer revenue by segment, with the revenue-share measure in the tooltip.
-- Table: segment, customer count, revenue, repeat rate, and average recency.
-- Add segment and customer-state slicers from `CustomerSegments`; state is each customer's latest recorded state, not necessarily their location at every order date.
+Shows customer count and item revenue by historical customer segment, summary KPIs, a customer-state slicer, and a segment detail table. Segment recency and state describe the historical customer snapshot; they are not current customer attributes.
 
-### Seller operations
+### Seller Performance
 
-- Table or bar charts by seller for average review score, late-delivery rate, and average days versus estimate.
-- Include seller-order count and review count in tooltips.
-- Apply a visual-level filter of at least 20 reviews when ranking sellers; this is a suggested exploratory threshold, not a statistical guarantee.
+Shows top sellers by item revenue, seller-order counts, items sold, seller delivery and review measures, and a scatter plot of seller late-delivery rate against review score. Seller IDs are the dataset's opaque identifiers.
 
-Seller metrics describe delivered seller-order records. An order-level review is associated with every seller on a multi-seller order, so seller review comparisons are not causal seller ratings. The seller table is disconnected from the customer/order tables; its slicers do not filter the other pages.
+## Open or refresh the report
+
+### Open the existing report
+
+1. Open `Ecommerce_Customer_Analytics.pbix` in Power BI Desktop.
+2. If Power BI prompts for missing CSV sources, recreate the CSVs as described below and point the queries to those files.
+3. Refresh the queries after the source data or SQL views change.
+
+### Recreate the CSV sources
+
+The raw and processed CSVs are local files excluded from Git. Download the [Olist Brazilian E-Commerce Dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) and extract it under `data/raw/`, preserving the original filenames.
+
+1. Set up Python and run `customer_features.ipynb` from the `notebooks/` directory. This creates `data/processed/customer_segments.csv`. See the [main README](../README.md) for environment setup.
+2. Configure `DATABASE_URL` for a dedicated PostgreSQL database. From the repository root, load the raw tables and build the views using the commands in [sql/README.md](../sql/README.md).
+3. Run `sql/04_export_powerbi.psql` from the repository root to create:
+   - `data/processed/powerbi_order_fact.csv`
+   - `data/processed/powerbi_seller_performance.csv`
+4. In Power BI Desktop, use **Get data → Text/CSV** to load the three files. Keep these table names:
+   - `powerbi_order_fact`
+   - `powerbi_seller_performance`
+   - `customer_segments`
+5. Create a one-to-many, single-direction relationship from `customer_segments[customer_unique_id]` to `powerbi_order_fact[customer_unique_id]`. Keep `powerbi_seller_performance` disconnected: it is aggregated by seller, while the order fact has no seller key.
+6. Confirm `customer_segments[is_repeat_customer]` is Boolean and order timestamps are Date/Time.
+
+The raw SQL loader stages customers, orders, order items, payments, and reviews. The Python notebooks use additional source CSVs for exploration and analysis. Run the loader only once against empty project tables; see [sql/README.md](../sql/README.md) for the full workflow and validation details.
+
+The report model and its DAX measures are maintained in the PBIX. A separate `measures.dax` export is not required for this workflow; edit the measures in Power BI Desktop.
+
+## Metric definitions and interpretation
+
+- **Revenue:** item price in Brazilian reais; excludes freight, costs, and profit.
+- **Revenue currency display:** revenue is formatted in Brazilian reais (**R$**) in the current report screenshots. Confirm the formatting remains correct after refreshing the CSV sources.
+- **Order delivery average:** 12.56 days across 96,470 delivered orders with valid delivery timestamps. The EDA value of 12.52 days includes only the 95,824 delivered orders that also have a review.
+- **Average order value:** the Order Performance KPI is calculated at order grain. The customer segment table summarizes customer-level average order value; its total is not the same measure.
+- **Customer measures:** customer count, repeat rate, and segments use the full historical customer snapshot. A purchase-date slicer does not recalculate those snapshot metrics.
+- **Seller totals:** the table total averages sellers equally. Its 6.91% late-delivery rate and 4.18 average review score differ from the marketplace's seller-order/review-weighted figures of about 6.69% and 4.14. Label the chosen aggregation clearly.
+- **Seller delivery average:** the seller table averages seller-level delivery measures; it is not directly comparable to the order-weighted delivery KPI.
+- **Seller reviews:** an order-level review may be associated with each seller on a multi-seller order. Seller review measures are descriptive, not independent causal ratings.
+- **Correlation filter:** the seller scatter is filtered to sellers with at least 20 reviews, matching the subset used for the reported correlation of about -0.53. This is an exploratory threshold, not a guarantee of statistical reliability.
+
+## Final dashboard checklist
+
+1. Confirm revenue measures and columns retain Brazilian Real (`R$`) formatting after refresh. Keep the values numeric; do not use DAX `FORMAT()` for measures used in charts.
+2. Label the customer table metric as **Average customer AOV** and the order-page metric as **Average order value** so the different grains are explicit.
+3. Keep the existing per-seller averages if they are useful for comparing sellers, but use weighted measures for marketplace-wide late rate and review score. Add these measures in Power BI:
+
+   ```DAX
+   Marketplace Late Rate (weighted) =
+   DIVIDE(
+       SUMX(
+           powerbi_seller_performance,
+           powerbi_seller_performance[late_delivery_rate]
+               * powerbi_seller_performance[schedule_observation_count]
+       ),
+       SUM(powerbi_seller_performance[schedule_observation_count])
+   )
+   ```
+
+   ```DAX
+   Marketplace Review Score (weighted) =
+   DIVIDE(
+       SUMX(
+           powerbi_seller_performance,
+           powerbi_seller_performance[average_review_score]
+               * powerbi_seller_performance[review_count]
+       ),
+       SUM(powerbi_seller_performance[review_count])
+   )
+   ```
+
+   These weight each seller's rate or score by its eligible seller-order or review count, respectively. Use them for marketplace-wide KPI cards; keep the per-seller values in seller comparisons.
+4. Confirm the scatter plot retains its visual-level `review_count >= 20` filter so its displayed sellers match the subset used for the reported correlation.
+5. Save the PBIX, close and reopen it to confirm it loads, then export fresh screenshots and replace the old PNGs in this folder.
+
+## Report assets
+
+- [Customer Segmentation screenshot](customer_segmentation.png)
+- [Order Performance screenshot](order_performance.png)
+- [Seller Performance screenshot](seller_performance.png)
+- [Business insights and recommendations](business_insights_and_recommendations.md)
