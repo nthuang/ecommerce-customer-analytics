@@ -62,7 +62,7 @@ Seller revenue and operating metrics, plus the relationship between seller late-
 
 ![Seller Performance dashboard](powerbi/seller_performance.png)
 
-The [Power BI README](powerbi/README.md) explains how to open the report, refresh its CSV sources, and interpret the dashboard measures. The detailed [business insights and recommendations](powerbi/business_insights_and_recommendations.md) document provides findings and caveats.
+The [Power BI README](powerbi/README.md) explains how to open the report, refresh its CSV sources, and interpret the dashboard measures. The detailed [business insights and recommendations](business_insights_and_recommendations.md) document provides findings and caveats.
 
 ## Recommendations
 
@@ -90,6 +90,7 @@ The Python analysis reads nine source CSVs. The PostgreSQL loader stages the fiv
 
 ```text
 ecommerce-customer-analytics/
+|-- business_insights_and_recommendations.md
 |-- data/                              # Local data; excluded from Git
 |   |-- raw/                           # Downloaded source CSVs
 |   `-- processed/                     # Notebook and SQL outputs
@@ -110,7 +111,6 @@ ecommerce-customer-analytics/
 |   |-- customer_segmentation.png
 |   |-- order_performance.png
 |   |-- seller_performance.png
-|   |-- business_insights_and_recommendations.md
 |   `-- README.md
 |-- requirements.txt
 `-- README.md

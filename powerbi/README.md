@@ -1,8 +1,8 @@
 # Power BI report
 
-This folder contains the three-page Power BI report, screenshots, and a narrative summary of the findings. Open [`Ecommerce_Customer_Analytics.pbix`](Ecommerce_Customer_Analytics.pbix) in Power BI Desktop to inspect the interactive report. The screenshots in this folder are also embedded in the [main project README](../README.md).
+This folder contains the three-page Power BI report and its screenshots. Open [`Ecommerce_Customer_Analytics.pbix`](Ecommerce_Customer_Analytics.pbix) in Power BI Desktop to inspect the interactive report. The screenshots in this folder are also embedded in the [main project README](../README.md). For findings and business recommendations across the project, see the [business insights and recommendations](../business_insights_and_recommendations.md) report.
 
-The report uses three CSV tables: an order fact, customer segments, and seller performance. Detailed business interpretation is in [business_insights_and_recommendations.md](business_insights_and_recommendations.md).
+The report uses three CSV tables: an order fact, customer segments, and seller performance.
 
 ## Report pages
 
@@ -97,4 +97,4 @@ The report model and its DAX measures are maintained in the PBIX. A separate `me
 - [Customer Segmentation screenshot](customer_segmentation.png)
 - [Order Performance screenshot](order_performance.png)
 - [Seller Performance screenshot](seller_performance.png)
-- [Business insights and recommendations](business_insights_and_recommendations.md)
+- [Business insights and recommendations](../business_insights_and_recommendations.md)
