@@ -32,6 +32,7 @@ The analysis covers orders purchased from September 2016 through August 2018. It
 ## Key findings
 
 - **Repeat purchasing was uncommon in the observed period:** 2,801 of 93,358 customers with delivered orders purchased more than once (3.00%). Repeat buyers contributed 5.51% of item revenue. This is a historical repeat rate, not a lifetime churn measure.
+- **Follow-up-adjusted second-purchase rates were low:** among customers with a complete observation window, 1.58% returned within 30 days (1,373 of 86,772), 1.95% within 60 days (1,584 of 81,203), and 2.28% within 90 days (1,714 of 75,320). Later cohorts are excluded from each horizon's denominator when they lack complete follow-up. See the [cohort analysis notebook](notebooks/cohort_retention.ipynb) for cohort-level rates and denominators.
 - **Higher-spend one-time buyers generated most revenue:** two such segments represented about 48.5% of customers and 78.65% of item revenue (approximately R$10.40 million).
 - **Revenue was geographically concentrated:** São Paulo, Rio de Janeiro, and Minas Gerais together contributed about 63.38% of delivered-order item revenue.
 - **Delivery times differed across regions:** the Power BI order fact averages 12.56 days across 96,470 delivered orders with valid delivery timestamps. Bahia averaged 19.34 days across 3,256 orders, making it a higher-volume improvement opportunity than the most delayed, low-volume states.
@@ -95,7 +96,8 @@ ecommerce-customer-analytics/
 |-- notebooks/
 |   |-- data_exploration.ipynb
 |   |-- eda.ipynb
-|   `-- customer_features.ipynb
+|   |-- customer_features.ipynb
+|   `-- cohort_retention.ipynb
 |-- sql/
 |   |-- 00_load_raw.psql
 |   |-- 01_order_fact.sql
