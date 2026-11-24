@@ -122,27 +122,35 @@ Download the [Olist Brazilian E-Commerce Dataset](https://www.kaggle.com/dataset
 
 ### 2. Set up Python and run the notebooks
 
-Python 3.10 or later is recommended. From the repository root:
+Python 3.10 or later is recommended. From the repository root, use the commands for your shell.
+
+**Linux/macOS (Bash):**
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 cd notebooks
 jupyter notebook
 ```
 
-On Windows PowerShell, activate the environment with:
+**Windows (PowerShell):**
 
 ```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Set-Location notebooks
+jupyter notebook
 ```
+
+If PowerShell blocks environment activation, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` for the current session, then activate again.
 
 Run the notebooks from top to bottom. Start Jupyter from `notebooks/` so the relative raw-data paths in the exploration and EDA notebooks resolve correctly. The customer feature notebook writes customer-segment data under `data/processed/`.
 
 ### 3. Build the PostgreSQL views (optional)
 
-Create an empty project database and set `DATABASE_URL` in your local shell. Do not commit credentials. From the repository root, run:
+Create an empty project database and set `DATABASE_URL` in your local shell. Do not commit credentials. The example below uses Bash syntax; in PowerShell, reference the variable as `$env:DATABASE_URL`. From the repository root, run:
 
 ```bash
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/00_load_raw.psql
@@ -157,6 +165,8 @@ The raw loader is intended to run once against empty project tables. It creates 
 ### 4. Open or refresh Power BI
 
 Open `powerbi/Ecommerce_Customer_Analytics.pbix` in Power BI Desktop. To refresh or rebuild its data, first generate the CSVs described in [powerbi/README.md](powerbi/README.md), then refresh the three CSV queries in Power BI.
+
+Power BI Desktop is a Windows application. On Linux, use the screenshots to review the report; to edit the PBIX, open it in Power BI Desktop on Windows. WSL users can open the corresponding Windows path for this repository.
 
 ## Important interpretation notes
 
